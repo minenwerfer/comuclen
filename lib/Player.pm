@@ -1,6 +1,5 @@
 =pod
 TODO:
-- find a way to order hashes
 =cut
 
 use strict;
@@ -10,7 +9,9 @@ package Player;
 
 sub new {
 	my ($class, $name) = @_;
-        my $self = {};
+        my $self = {
+		round => 1 
+	};
 
         bless $self, $class;
 
@@ -31,12 +32,15 @@ sub tick {
 
 sub do {
 	my ($self, $action) = @_;
-	my $choice = $self->{choices}->{$action};
+	my ($match) = grep { $self->{choices}->{$_}->{key} eq $action } keys %{$self->{choices}};
+	my $choice = $self->{choices}->{$match} if $match;
+
 	my @stats;
 
 	if( !$choice ) {
 		return {
 			value => -1,
+			match => $action,
 		      	message => "Ação desconhecida"
 		};
 	}
@@ -52,6 +56,7 @@ sub do {
 			if ($available < $required)  {
 			return {
 				value => -1,
+				match => $match,
 				message => "@{[ucfirst($name)]} insuficiente. Necessário: $required, disponível: $available"
 			};
 		}
@@ -92,7 +97,7 @@ sub do {
 		$name = "multiplicador de $name" if $multiplier;
 
 		if ($multiplier) {
-			$value = int(1000*$value)/1000;
+			$value = int(1000 * $value) / 100;
 			$stat->{multiplier} += $value;
 		} else {
 			$value = int($value * $stat->{multiplier});
@@ -106,12 +111,13 @@ sub do {
 
 	my $fortune = $choice->{func}
 		? $choice->{func}($self)
-		: 0;
+		: {};
 
 	return {
 		value => 0,
-		      message => "$self->{name} gastou $spent_str e ganhou $profit_str",
-		      fortune => $fortune
+		match => $match,
+	      	message => "$self->{name} gastou $spent_str e ganhou $profit_str",
+	      	fortune => $fortune
 	};
 }
 
