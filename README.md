@@ -1,5 +1,4 @@
 Comuclen
-########
 
 Yep, another Andre Jampa simulator written in Perl.
 Full-featured clening engine that supports various cleners dating from 2014.
